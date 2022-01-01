@@ -17,10 +17,10 @@ steps:
   inputs:
     version: '$(dotnetSdkVersion)'
 
-- task: Npm@1
+- task: NodeTool@0
   displayName: 'Run npm install'
   inputs:
-    verbose: false
+    versionSpec: '14.x'
 
 - script: './node_modules/.bin/node-sass $(wwwrootDir) --output $(wwwrootDir)'
   displayName: 'Compile Sass assets'
