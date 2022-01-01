@@ -58,4 +58,4 @@ steps:
     zipAfterPublish: true
 
 - publish: '$(Build.ArtifactStagingDirectory)'
-  artifact: drop2
+  artifact: drop
