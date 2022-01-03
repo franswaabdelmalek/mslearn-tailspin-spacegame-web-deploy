@@ -10,20 +10,6 @@ schedules:
   displayName: 'Deploy every day at 3 A.M.'
   branches:
     include:
-    - release
-  always: false
-
-- cron: '35 12 * * *'
-  displayName: 'Deploy every day at 12:35 P.M.'
-  branches:
-    include:
-    - $(releaseBranchName)
-  always: false
-
-- cron: '40 12 * * *'
-  displayName: 'Deploy every day at 12:40 P.M.'
-  branches:
-    include:
     - $(releaseBranchName)
   always: false
 
