@@ -73,7 +73,8 @@ stages:
   displayName: 'Deploy to the dev environment'
   dependsOn: Build
   condition: |
-    and(
+    and
+    (
       succeeded(),
       eq(variables['Build.SourceBanchName'], variables['releaseBranchName'])
     )
