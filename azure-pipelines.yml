@@ -135,11 +135,11 @@ stages:
 - stage: 'Staging'
   displayName: 'Deploy to the staging environment'
   dependsOn: Test
-  environment: staging
 
   jobs:
   - deployment: Deploy_Staging
     displayName: 'Staging env deployment job'
+    environment: staging
     pool:
       vmImage: ubuntu-20.04
     
