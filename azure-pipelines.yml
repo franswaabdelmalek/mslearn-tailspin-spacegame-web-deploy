@@ -109,7 +109,7 @@ stages:
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
   dependsOn: Dev
-  condition: eq(variables['Build.Reason'], 'Schedule')
+  #condition: eq(variables['Build.Reason'], 'Schedule')
   jobs:
   - deployment: Deploy
     displayName: 'Test env deployment'
@@ -130,4 +130,31 @@ stages:
             inputs:
               azureSubscription: 'Research-and-Development'
               appName: '$(WebAppNameTest)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+- stage: 'Staging'
+  displayName: 'Deploy to the staging environment'
+  dependsOn: Test
+
+  jobs:
+  - deployment: Deploy_Staging
+    displayName: 'Staging env deployment job'
+    pool:
+      vmImage: ubuntu-20.04
+    
+    variables:
+    - group: 'Release'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - deployment: current
+            artifact: drop
+
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: website'
+            inputs:
+              azureSubscription: 'Research-and-Development'
+              appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
