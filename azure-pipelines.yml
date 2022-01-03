@@ -149,7 +149,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - deployment: current
+          - download: current
             artifact: drop
 
           - task: AzureWebApp@1
