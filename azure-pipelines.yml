@@ -18,6 +18,7 @@ stages:
     variables:
       wwwrootDir: 'Tailspin.SpaceGame.Web/wwwroot'
       dotnetSdkVersion: '5.x'
+      nodeVersion: 14.x
 
     steps:
     - task: UseDotNet@2
@@ -25,10 +26,13 @@ stages:
       inputs:
         version: '$(dotnetSdkVersion)'
 
-    - task: Npm@1
-      displayName: 'Run npm install'
+    - task: NodeTool@0
+      displayName: 'Download Node $(nodeVersion)'
       inputs:
-        verbose: false
+        versionSpec: $(nodeVersion)
+    
+    - script: 'npm install'
+      displayName: 'Run npm install'
 
     - script: './node_modules/.bin/node-sass $(wwwrootDir) --output $(wwwrootDir)'
       displayName: 'Compile Sass assets'
@@ -133,3 +137,33 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+  - job: RunLoadTests
+    dependsOn: Deploy
+    displayName: 'Run load tests'
+
+    pool:
+      vmImage: ubuntu-20.04
+    
+    variables:
+    - group: Release
+    
+    steps:
+    - script: |
+        wget -c ftp.ps.pl/pub/apache/jmeter/binaries/apache-jmeter-$(jmeterVersion).tgz
+        tar -xzf apache-jmeter-$(jmeterVersion).tgz
+      displayName: 'Install Apache JMeter'
+
+    - script: apache-jmeter-$(jmeterVersion)/bin/./jmeter -n -t LoadTest.jmx -o Results.xml -Jhostname=$(STAGING_HOSTNAME)
+      displayName: 'Run Load tests'
+
+    - script: |
+        sudo apt-get update
+        sudo apt-get install xsltproc
+        xsltproc JMeter2JUnit.xsl Results.xml > JUnit.xml
+      displayName: 'Transform JMeter output to JUnit'
+    
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: JUnit
+        testRestulsFiles: JUnit.xml
